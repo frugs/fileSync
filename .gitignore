@@ -1,3 +1,5 @@
 .fileSync/
 .idea/
 fileSync.iml
+lib/
+out/
