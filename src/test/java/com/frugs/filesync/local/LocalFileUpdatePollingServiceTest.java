@@ -1,7 +1,7 @@
 package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
-import com.frugs.filesync.local.system.SystemCommandExecutor;
+import com.frugs.filesync.local.system.FileUpdateFacade;
 import com.frugs.filesync.remote.RemoteFileUpdateSender;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,17 +14,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import static com.frugs.filesync.domain.Diff.emptyDiff;
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
-import static org.apache.commons.io.IOUtils.toInputStream;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocalFileUpdatePollingServiceTest {
-    @Mock private SystemCommandExecutor mockSystemCommandExecutor;
+    @Mock private FileUpdateFacade mockFileUpdateFacade;
     @Mock private RemoteFileUpdateSender mockRemoteFileUpdateSender;
     @Mock private LockedDiff mockPreviousState;
     @Mock private Logger logger;
@@ -32,17 +30,12 @@ public class LocalFileUpdatePollingServiceTest {
 
     @Before
     public void setUp() {
-        localFileUpdatePollingService = new LocalFileUpdatePollingService(mockSystemCommandExecutor, mockPreviousState, mockRemoteFileUpdateSender, logger);
+        localFileUpdatePollingService = new LocalFileUpdatePollingService(mockPreviousState, mockFileUpdateFacade, mockRemoteFileUpdateSender, logger);
     }
 
     @Test
     public void pollForLocalFileUpdates_does_nothing_if_interDiff_is_empty() throws IOException {
-        Diff unchangedDiff = aDiff()
-            .withContent("no changes")
-            .build();
-        when(mockPreviousState.retrieve()).thenReturn(unchangedDiff);
-        when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("no changes"));
-        when(mockSystemCommandExecutor.interDiff(anyString(), anyString())).thenReturn(toInputStream(""));
+        when(mockFileUpdateFacade.interDiff((Diff) any(), (Diff) any())).thenReturn(emptyDiff);
 
         localFileUpdatePollingService.pollForLocalFileUpdates();
 
@@ -54,9 +47,10 @@ public class LocalFileUpdatePollingServiceTest {
 
     @Test
     public void pollForLocalFileUpdates_sends_updates_if_interDiff_hasChanges() throws IOException {
-        when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
-        when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("Current Changes"));
-        when(mockSystemCommandExecutor.interDiff(anyString(), anyString())).thenReturn(toInputStream("the difference"));
+        Diff currentChanges = aDiff().withContent("Current Changes").build();
+        Diff difference = aDiff().withContent("non-empty").build();
+        when(mockFileUpdateFacade.getCurrentState()).thenReturn(currentChanges);
+        when(mockFileUpdateFacade.interDiff((Diff) any(), (Diff) any())).thenReturn(difference);
 
         localFileUpdatePollingService.pollForLocalFileUpdates();
 
@@ -70,9 +64,9 @@ public class LocalFileUpdatePollingServiceTest {
         inOrder.verify(mockPreviousState).putBack();
 
         Diff savedDiff = savedDiffCaptor.getValue();
-        assertThat(savedDiff.toString(), is("Current Changes"));
+        assertThat(savedDiff, is(currentChanges));
 
         Diff sentDiff = sentDiffCaptor.getValue();
-        assertThat(sentDiff.toString(), is("the difference"));
+        assertThat(sentDiff, is(difference));
     }
 }

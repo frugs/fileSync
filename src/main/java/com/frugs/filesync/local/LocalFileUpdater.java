@@ -1,33 +1,28 @@
 package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
-import com.frugs.filesync.local.system.SystemCommandExecutor;
+import com.frugs.filesync.local.system.FileUpdateFacade;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.logging.Logger;
-
-import static com.frugs.filesync.domain.Diff.fromInputStream;
 
 public class LocalFileUpdater {
     private final LockedDiff previousState;
-    private final SystemCommandExecutor systemCommandExecutor;
+    private final FileUpdateFacade fileUpdateFacade;
     private final Logger logger;
 
-    public LocalFileUpdater(LockedDiff previousState, SystemCommandExecutor systemCommandExecutor, Logger logger) {
+    public LocalFileUpdater(LockedDiff previousState, FileUpdateFacade fileUpdateFacade, Logger logger) {
         this.previousState = previousState;
-        this.systemCommandExecutor = systemCommandExecutor;
+        this.fileUpdateFacade = fileUpdateFacade;
         this.logger = logger;
     }
 
     public void updateLocalFiles(Diff update) throws IOException {
         logger.info("updating local files\n" + update.toString());
         previousState.retrieve();
-        systemCommandExecutor.gitApply(update.toString());
+        fileUpdateFacade.applyDiff(update);
 
-        InputStream updatedDiffInputStream = systemCommandExecutor.gitDiffHead();
-        Diff updatedDiff = fromInputStream(updatedDiffInputStream);
-
+        Diff updatedDiff = fileUpdateFacade.getCurrentState();
         previousState.set(updatedDiff);
         previousState.putBack();
     }

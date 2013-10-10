@@ -15,41 +15,37 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
-import static org.apache.commons.io.IOUtils.toInputStream;
-import static org.hamcrest.core.Is.is;
+import static com.frugs.filesync.domain.DiffMatchers.hasContent;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocalFileUpdaterTest {
     @Mock private Logger logger;
     @Mock private LockedDiff mockPreviousState;
-    @Mock private SystemCommandExecutor mockSystemCommandExecutor;
+    @Mock private FileUpdateFacade mockFileUpdateFacade;
 
     private LocalFileUpdater localFileUpdater;
 
     @Before
     public void setUp() {
-        localFileUpdater = new LocalFileUpdater(mockPreviousState, mockSystemCommandExecutor, logger);
+        localFileUpdater = new LocalFileUpdater(mockPreviousState, mockFileUpdateFacade, logger);
     }
 
     @Test
     public void updateLocalFiles_delegates_to_commandExecutor() throws IOException {
-        Diff updates = aDiff().withContent("updates").build();
-        Diff previous = aDiff().withContent("previous").build();
-        when(mockPreviousState.retrieve()).thenReturn(previous);
-        when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("blah"));
+        when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
+        when(mockFileUpdateFacade.getCurrentState()).thenReturn(aDiff().build());
 
+        Diff updates = aDiff().withContent("updates").build();
         localFileUpdater.updateLocalFiles(updates);
-        verify(mockSystemCommandExecutor).gitApply("updates");
+        verify(mockFileUpdateFacade).applyDiff(updates);
     }
 
     @Test
     public void updateLocalFiles_updates_previous_state_to_current_state() throws IOException {
         when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
-        when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("combined"));
+        when(mockFileUpdateFacade.getCurrentState()).thenReturn(aDiff().build());
         localFileUpdater.updateLocalFiles(aDiff().build());
 
         ArgumentCaptor<Diff> captor = ArgumentCaptor.forClass(Diff.class);
@@ -59,6 +55,6 @@ public class LocalFileUpdaterTest {
         inOrder.verify(mockPreviousState).putBack();
 
         Diff updatedDiff = captor.getValue();
-        assertThat(updatedDiff.toString(), is("combined"));
+        assertThat(updatedDiff, hasContent("combined"));
     }
 }

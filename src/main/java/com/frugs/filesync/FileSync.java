@@ -4,6 +4,7 @@ import com.frugs.filesync.domain.Diff;
 import com.frugs.filesync.local.LocalFileUpdatePollingService;
 import com.frugs.filesync.local.LocalFileUpdater;
 import com.frugs.filesync.local.LockedDiff;
+import com.frugs.filesync.local.system.FileUpdateFacade;
 import com.frugs.filesync.local.system.SystemCommandExecutor;
 import com.frugs.filesync.remote.RemoteFileUpdateReceiver;
 import com.frugs.filesync.remote.RemoteFileUpdateSender;
@@ -44,12 +45,13 @@ public class FileSync {
             Logger logger = new CustomLogger();
 
             SystemCommandExecutor systemCommandExecutor = new SystemCommandExecutor(logger);
+            FileUpdateFacade fileUpdateFacade = new FileUpdateFacade(systemCommandExecutor);
             LockedDiff lockedDiff = new LockedDiff(new ReentrantLock(), Diff.fromInputStream(systemCommandExecutor.gitDiffHead()));
 
-            LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, systemCommandExecutor, logger);
+            LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, fileUpdateFacade, logger);
             RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteAddress, remotePort, logger);
 
-            LocalFileUpdatePollingService localFileUpdatePollingService = new LocalFileUpdatePollingService(systemCommandExecutor, lockedDiff, remoteFileUpdateSender, logger);
+            LocalFileUpdatePollingService localFileUpdatePollingService = new LocalFileUpdatePollingService(lockedDiff, fileUpdateFacade, remoteFileUpdateSender, logger);
             RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(localPort, localFileUpdater, logger);
 
             Runnable pollLocalUpdatesTask = new PollLocalUpdatesTask(localFileUpdatePollingService);

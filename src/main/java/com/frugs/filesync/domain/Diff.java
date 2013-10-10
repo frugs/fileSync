@@ -34,4 +34,8 @@ public class Diff {
     public boolean hasChanges() {
         return data.length != 0;
     }
+
+    public boolean isEmpty() {
+        return data.length == 0;
+    }
 }
