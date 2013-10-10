@@ -39,7 +39,7 @@ public class LocalFileUpdaterTest {
         Diff updates = aDiff().withContent("updates").build();
         Diff previous = aDiff().withContent("previous").build();
         when(mockPreviousState.retrieve()).thenReturn(previous);
-        when(mockSystemCommandExecutor.combineDiff("previous", "updates")).thenReturn(toInputStream("blah"));
+        when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("blah"));
 
         localFileUpdater.updateLocalFiles(updates);
         verify(mockSystemCommandExecutor).gitApply("updates");
@@ -48,7 +48,7 @@ public class LocalFileUpdaterTest {
     @Test
     public void updateLocalFiles_updates_previous_state_to_current_state() throws IOException {
         when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
-        when(mockSystemCommandExecutor.combineDiff(anyString(), anyString())).thenReturn(toInputStream("combined"));
+        when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("combined"));
         localFileUpdater.updateLocalFiles(aDiff().build());
 
         ArgumentCaptor<Diff> captor = ArgumentCaptor.forClass(Diff.class);

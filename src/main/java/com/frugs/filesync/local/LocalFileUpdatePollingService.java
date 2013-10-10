@@ -2,10 +2,8 @@ package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
 import com.frugs.filesync.local.system.SystemCommandExecutor;
-import com.frugs.filesync.remote.RemoteFileUpdateReceiver;
 import com.frugs.filesync.remote.RemoteFileUpdateSender;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 

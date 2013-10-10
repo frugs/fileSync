@@ -1,7 +1,6 @@
 package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
-import com.frugs.filesync.local.LockedDiff;
 import com.frugs.filesync.local.system.SystemCommandExecutor;
 
 import java.io.IOException;
@@ -19,10 +18,10 @@ public class LocalFileUpdater {
     }
 
     public void updateLocalFiles(Diff update) throws IOException {
-        Diff previous = previousState.retrieve();
+        previousState.retrieve();
         systemCommandExecutor.gitApply(update.toString());
 
-        InputStream updatedDiffInputStream = systemCommandExecutor.combineDiff(previous.toString(), update.toString());
+        InputStream updatedDiffInputStream = systemCommandExecutor.gitDiffHead();
         Diff updatedDiff = fromInputStream(updatedDiffInputStream);
 
         previousState.set(updatedDiff);
