@@ -10,18 +10,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
 import static java.net.InetAddress.getLocalHost;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,7 +25,7 @@ public class RemoteFileUpdateReceiverTest {
 
     @Before
     public void setUp() throws Exception {
-        remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(getLocalHost(), port, mockLocalFileUpdater);
+        remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(port, mockLocalFileUpdater);
     }
 
     @Test

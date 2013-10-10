@@ -8,13 +8,12 @@ import com.frugs.filesync.local.system.SystemCommandExecutor;
 import com.frugs.filesync.remote.RemoteFileUpdateReceiver;
 import com.frugs.filesync.remote.RemoteFileUpdateSender;
 import com.frugs.filesync.task.PollLocalUpdatesTask;
-import javafx.concurrent.Task;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.Integer.parseInt;
 import static java.net.InetAddress.getLocalHost;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -24,16 +23,17 @@ public class FileSync {
         //TODO fix this up a bit later, just trying to see whether it works
         try {
             InetAddress remoteAddress = getLocalHost();
-            int port = 45903;
+            int localPort = parseInt(args[0]);
+            int remotePort = parseInt(args[1]);
 
             SystemCommandExecutor systemCommandExecutor = new SystemCommandExecutor();
             LockedDiff lockedDiff = new LockedDiff(new ReentrantLock(), Diff.emptyDiff);
 
             LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, systemCommandExecutor);
-            RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteAddress, port);
+            RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteAddress, remotePort);
 
             LocalFileUpdatePollingService localFileUpdatePollingService = new LocalFileUpdatePollingService(systemCommandExecutor, lockedDiff, remoteFileUpdateSender);
-            RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(remoteAddress, port, localFileUpdater);
+            RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(localPort, localFileUpdater);
 
             Runnable pollLocalUpdatesTask = new PollLocalUpdatesTask(localFileUpdatePollingService);
             startInSingleRepeatingThread(pollLocalUpdatesTask, 500, MILLISECONDS);
