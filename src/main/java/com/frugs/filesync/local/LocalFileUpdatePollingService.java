@@ -2,7 +2,8 @@ package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
 import com.frugs.filesync.local.system.SystemCommandExecutor;
-import com.frugs.filesync.remote.ExternalFileUpdateService;
+import com.frugs.filesync.remote.RemoteFileUpdateReceiver;
+import com.frugs.filesync.remote.RemoteFileUpdateSender;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -10,16 +11,15 @@ import java.io.InputStream;
 
 import static com.frugs.filesync.domain.Diff.fromInputStream;
 
-public class LocalFileUpdateService {
+public class LocalFileUpdatePollingService {
     private final SystemCommandExecutor systemCommandExecutor;
-    private final ExternalFileUpdateService externalFileUpdateService;
     private final LockedDiff previousState;
+    private RemoteFileUpdateSender remoteFileUpdateSender;
 
-    @Inject
-    public LocalFileUpdateService(SystemCommandExecutor systemCommandExecutor, ExternalFileUpdateService externalFileUpdateService, LockedDiff previousState) {
+    public LocalFileUpdatePollingService(SystemCommandExecutor systemCommandExecutor, LockedDiff previousState, RemoteFileUpdateSender remoteFileUpdateSender) {
         this.systemCommandExecutor = systemCommandExecutor;
-        this.externalFileUpdateService = externalFileUpdateService;
         this.previousState = previousState;
+        this.remoteFileUpdateSender = remoteFileUpdateSender;
     }
 
     public void pollForLocalFileUpdates() throws IOException {
@@ -30,20 +30,9 @@ public class LocalFileUpdateService {
         Diff interDiff = fromInputStream(interDiffInputStream);
 
         if (interDiff.hasChanges()) {
-            externalFileUpdateService.sendUpdates(interDiff);
+            remoteFileUpdateSender.sendUpdates(interDiff);
             previousState.set(current);
         }
-        previousState.putBack();
-    }
-
-    public void updateLocalFiles(Diff update) throws IOException {
-        Diff previous = previousState.retrieve();
-        systemCommandExecutor.gitApply(update.toString());
-
-        InputStream updatedDiffInputStream = systemCommandExecutor.combineDiff(previous.toString(), update.toString());
-        Diff updatedDiff = fromInputStream(updatedDiffInputStream);
-
-        previousState.set(updatedDiff);
         previousState.putBack();
     }
 }

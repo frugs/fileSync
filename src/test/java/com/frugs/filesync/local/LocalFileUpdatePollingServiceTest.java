@@ -2,7 +2,7 @@ package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
 import com.frugs.filesync.local.system.SystemCommandExecutor;
-import com.frugs.filesync.remote.ExternalFileUpdateService;
+import com.frugs.filesync.remote.RemoteFileUpdateSender;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,42 +22,15 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LocalFileUpdateServiceTest {
+public class LocalFileUpdatePollingServiceTest {
     @Mock private SystemCommandExecutor mockSystemCommandExecutor;
-    @Mock private ExternalFileUpdateService mockExternalFileUpdateService;
+    @Mock private RemoteFileUpdateSender mockRemoteFileUpdateSender;
     @Mock private LockedDiff mockPreviousState;
-    private LocalFileUpdateService localFileUpdateService;
+    private LocalFileUpdatePollingService localFileUpdatePollingService;
 
     @Before
     public void setUp() {
-        localFileUpdateService = new LocalFileUpdateService(mockSystemCommandExecutor, mockExternalFileUpdateService, mockPreviousState);
-    }
-
-    @Test
-    public void updateLocalFiles_delegates_to_commandExecutor() throws IOException {
-        Diff updates = aDiff().withContent("updates").build();
-        Diff previous = aDiff().withContent("previous").build();
-        when(mockPreviousState.retrieve()).thenReturn(previous);
-        when(mockSystemCommandExecutor.combineDiff("previous", "updates")).thenReturn(toInputStream("blah"));
-
-        localFileUpdateService.updateLocalFiles(updates);
-        verify(mockSystemCommandExecutor).gitApply("updates");
-    }
-
-    @Test
-    public void updateLocalFiles_updates_previous_state_to_current_state() throws IOException {
-        when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
-        when(mockSystemCommandExecutor.combineDiff(anyString(), anyString())).thenReturn(toInputStream("combined"));
-        localFileUpdateService.updateLocalFiles(aDiff().build());
-
-        ArgumentCaptor<Diff> captor = ArgumentCaptor.forClass(Diff.class);
-        InOrder inOrder = inOrder(mockPreviousState);
-        inOrder.verify(mockPreviousState).retrieve();
-        inOrder.verify(mockPreviousState).set(captor.capture());
-        inOrder.verify(mockPreviousState).putBack();
-
-        Diff updatedDiff = captor.getValue();
-        assertThat(updatedDiff.toString(), is("combined"));
+        localFileUpdatePollingService = new LocalFileUpdatePollingService(mockSystemCommandExecutor, mockPreviousState, mockRemoteFileUpdateSender);
     }
 
     @Test
@@ -69,12 +42,12 @@ public class LocalFileUpdateServiceTest {
         when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("no changes"));
         when(mockSystemCommandExecutor.interDiff(anyString(), anyString())).thenReturn(toInputStream(""));
 
-        localFileUpdateService.pollForLocalFileUpdates();
+        localFileUpdatePollingService.pollForLocalFileUpdates();
 
         InOrder inOrder = inOrder(mockPreviousState);
         inOrder.verify(mockPreviousState).retrieve();
         inOrder.verify(mockPreviousState).putBack();
-        verifyNoMoreInteractions(mockExternalFileUpdateService);
+        verifyNoMoreInteractions(mockRemoteFileUpdateSender);
     }
 
     @Test
@@ -83,14 +56,14 @@ public class LocalFileUpdateServiceTest {
         when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("Current Changes"));
         when(mockSystemCommandExecutor.interDiff(anyString(), anyString())).thenReturn(toInputStream("the difference"));
 
-        localFileUpdateService.pollForLocalFileUpdates();
+        localFileUpdatePollingService.pollForLocalFileUpdates();
 
         ArgumentCaptor<Diff> savedDiffCaptor = ArgumentCaptor.forClass(Diff.class);
         ArgumentCaptor<Diff> sentDiffCaptor = ArgumentCaptor.forClass(Diff.class);
 
-        InOrder inOrder = inOrder(mockPreviousState, mockExternalFileUpdateService);
+        InOrder inOrder = inOrder(mockPreviousState, mockRemoteFileUpdateSender);
         inOrder.verify(mockPreviousState).retrieve();
-        inOrder.verify(mockExternalFileUpdateService).sendUpdates(sentDiffCaptor.capture());
+        inOrder.verify(mockRemoteFileUpdateSender).sendUpdates(sentDiffCaptor.capture());
         inOrder.verify(mockPreviousState).set(savedDiffCaptor.capture());
         inOrder.verify(mockPreviousState).putBack();
 

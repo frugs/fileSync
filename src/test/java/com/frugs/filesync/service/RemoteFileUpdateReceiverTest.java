@@ -1,0 +1,69 @@
+package com.frugs.filesync.service;
+
+import com.frugs.filesync.domain.Diff;
+import com.frugs.filesync.local.LocalFileUpdater;
+import com.frugs.filesync.remote.RemoteFileUpdateReceiver;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+
+import static com.frugs.filesync.domain.DiffBuilder.aDiff;
+import static java.net.InetAddress.getLocalHost;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
+
+@RunWith(MockitoJUnitRunner.class)
+public class RemoteFileUpdateReceiverTest {
+    private final static int port = 49803;
+    @Mock private LocalFileUpdater mockLocalFileUpdater;
+
+    private RemoteFileUpdateReceiver remoteFileUpdateReceiver;
+
+    @Before
+    public void setUp() throws Exception {
+        remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(getLocalHost(), port, mockLocalFileUpdater);
+    }
+
+    @Test
+    public void acceptUpdates_shouldAcceptIncomingDiffStreams_andUpdateLocalFiles() throws IOException, InterruptedException {
+        final Object waitHandle = new Object();
+        Runnable acceptUpdates = new Runnable() {
+            @Override public void run() {
+                try {
+                    remoteFileUpdateReceiver.acceptUpdates();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                synchronized (waitHandle) {
+                    waitHandle.notify();
+                }
+            }
+        };
+        new Thread(acceptUpdates).start();
+        Thread.sleep(1000);
+
+        Diff incomingDiff = aDiff().build();
+
+        Socket socket = new Socket(getLocalHost(), port);
+        socket.getOutputStream().write(incomingDiff.toByteArray());
+        socket.close();
+
+        synchronized (waitHandle) {
+            waitHandle.wait();
+        }
+        verify(mockLocalFileUpdater).updateLocalFiles(incomingDiff);
+    }
+}
