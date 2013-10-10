@@ -20,6 +20,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class FileSync {
     public static void main(String[] args) {
+
+        //TODO fix this up a bit later, just trying to see whether it works
         try {
             InetAddress remoteAddress = getLocalHost();
             int port = 45903;
