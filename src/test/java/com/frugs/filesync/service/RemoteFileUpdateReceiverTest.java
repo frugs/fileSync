@@ -11,6 +11,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
 import static java.net.InetAddress.getLocalHost;
@@ -20,12 +21,13 @@ import static org.mockito.Mockito.verify;
 public class RemoteFileUpdateReceiverTest {
     private final static int port = 49803;
     @Mock private LocalFileUpdater mockLocalFileUpdater;
+    @Mock private Logger logger;
 
     private RemoteFileUpdateReceiver remoteFileUpdateReceiver;
 
     @Before
     public void setUp() throws Exception {
-        remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(port, mockLocalFileUpdater);
+        remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(port, mockLocalFileUpdater, logger);
     }
 
     @Test

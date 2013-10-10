@@ -4,16 +4,17 @@ import com.frugs.filesync.domain.Diff;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.logging.Logger;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
 import static java.net.InetAddress.getLocalHost;
@@ -22,12 +23,14 @@ import static org.junit.Assert.assertTrue;
 @RunWith(MockitoJUnitRunner.class)
 public class RemoteFileUpdateSenderTest {
 
+    @Mock private Logger logger;
+
     private static final int port = 48939;
     private RemoteFileUpdateSender remoteFileUpdateReceiver;
 
     @Before
     public void setUp() throws Exception {
-        remoteFileUpdateReceiver = new RemoteFileUpdateSender(getLocalHost(), port);
+        remoteFileUpdateReceiver = new RemoteFileUpdateSender(getLocalHost(), port, logger);
     }
 
     @Test

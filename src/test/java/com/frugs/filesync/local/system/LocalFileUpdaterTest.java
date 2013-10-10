@@ -12,18 +12,19 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocalFileUpdaterTest {
+    @Mock private Logger logger;
     @Mock private LockedDiff mockPreviousState;
     @Mock private SystemCommandExecutor mockSystemCommandExecutor;
 
@@ -31,7 +32,7 @@ public class LocalFileUpdaterTest {
 
     @Before
     public void setUp() {
-        localFileUpdater = new LocalFileUpdater(mockPreviousState, mockSystemCommandExecutor);
+        localFileUpdater = new LocalFileUpdater(mockPreviousState, mockSystemCommandExecutor, logger);
     }
 
     @Test

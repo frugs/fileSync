@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
 import static org.apache.commons.io.IOUtils.toInputStream;
@@ -26,11 +27,12 @@ public class LocalFileUpdatePollingServiceTest {
     @Mock private SystemCommandExecutor mockSystemCommandExecutor;
     @Mock private RemoteFileUpdateSender mockRemoteFileUpdateSender;
     @Mock private LockedDiff mockPreviousState;
+    @Mock private Logger logger;
     private LocalFileUpdatePollingService localFileUpdatePollingService;
 
     @Before
     public void setUp() {
-        localFileUpdatePollingService = new LocalFileUpdatePollingService(mockSystemCommandExecutor, mockPreviousState, mockRemoteFileUpdateSender);
+        localFileUpdatePollingService = new LocalFileUpdatePollingService(mockSystemCommandExecutor, mockPreviousState, mockRemoteFileUpdateSender, logger);
     }
 
     @Test

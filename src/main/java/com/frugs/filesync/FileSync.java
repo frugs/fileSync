@@ -14,12 +14,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 import static java.lang.Integer.parseInt;
 import static java.net.InetAddress.getLocalHost;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class FileSync {
+
+    //TODO deleteme - lol...
+    static class CustomLogger extends Logger {
+        public CustomLogger() {
+            super(null, null);
+        }
+
+        @Override public void info(String message) {
+            System.out.println(message);
+        }
+    }
+
     public static void main(String[] args) {
 
         //TODO fix this up a bit later, just trying to see whether it works
@@ -28,14 +41,16 @@ public class FileSync {
             int localPort = parseInt(args[0]);
             int remotePort = parseInt(args[1]);
 
-            SystemCommandExecutor systemCommandExecutor = new SystemCommandExecutor();
-            LockedDiff lockedDiff = new LockedDiff(new ReentrantLock(), Diff.emptyDiff);
+            Logger logger = new CustomLogger();
 
-            LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, systemCommandExecutor);
-            RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteAddress, remotePort);
+            SystemCommandExecutor systemCommandExecutor = new SystemCommandExecutor(logger);
+            LockedDiff lockedDiff = new LockedDiff(new ReentrantLock(), Diff.fromInputStream(systemCommandExecutor.gitDiffHead()));
 
-            LocalFileUpdatePollingService localFileUpdatePollingService = new LocalFileUpdatePollingService(systemCommandExecutor, lockedDiff, remoteFileUpdateSender);
-            RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(localPort, localFileUpdater);
+            LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, systemCommandExecutor, logger);
+            RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteAddress, remotePort, logger);
+
+            LocalFileUpdatePollingService localFileUpdatePollingService = new LocalFileUpdatePollingService(systemCommandExecutor, lockedDiff, remoteFileUpdateSender, logger);
+            RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(localPort, localFileUpdater, logger);
 
             Runnable pollLocalUpdatesTask = new PollLocalUpdatesTask(localFileUpdatePollingService);
             startInSingleRepeatingThread(pollLocalUpdatesTask, 500, MILLISECONDS);
