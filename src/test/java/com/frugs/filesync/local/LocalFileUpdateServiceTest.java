@@ -13,6 +13,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
+import static com.frugs.filesync.domain.DiffBuilder.aDiff;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -34,15 +35,37 @@ public class LocalFileUpdateServiceTest {
 
     @Test
     public void updateLocalFiles_delegates_to_commandExecutor() throws IOException {
-        Diff updates = new Diff("updates".getBytes());
+        Diff updates = aDiff().withContent("updates").build();
+        Diff previous = aDiff().withContent("previous").build();
+        when(mockPreviousState.retrieve()).thenReturn(previous);
+        when(mockSystemCommandExecutor.combineDiff("previous", "updates")).thenReturn(toInputStream("blah"));
 
         localFileUpdateService.updateLocalFiles(updates);
         verify(mockSystemCommandExecutor).gitApply("updates");
     }
 
     @Test
+    public void updateLocalFiles_updates_previous_state_to_current_state() throws IOException {
+        when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
+        when(mockSystemCommandExecutor.combineDiff(anyString(), anyString())).thenReturn(toInputStream("combined"));
+        localFileUpdateService.updateLocalFiles(aDiff().build());
+
+        ArgumentCaptor<Diff> captor = ArgumentCaptor.forClass(Diff.class);
+        InOrder inOrder = inOrder(mockPreviousState);
+        inOrder.verify(mockPreviousState).retrieve();
+        inOrder.verify(mockPreviousState).set(captor.capture());
+        inOrder.verify(mockPreviousState).putBack();
+
+        Diff updatedDiff = captor.getValue();
+        assertThat(updatedDiff.toString(), is("combined"));
+    }
+
+    @Test
     public void pollForLocalFileUpdates_does_nothing_if_interDiff_is_empty() throws IOException {
-        when(mockPreviousState.retrieve()).thenReturn(new Diff("no Changes".getBytes()));
+        Diff unchangedDiff = aDiff()
+            .withContent("no changes")
+            .build();
+        when(mockPreviousState.retrieve()).thenReturn(unchangedDiff);
         when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("no changes"));
         when(mockSystemCommandExecutor.interDiff(anyString(), anyString())).thenReturn(toInputStream(""));
 
@@ -56,7 +79,7 @@ public class LocalFileUpdateServiceTest {
 
     @Test
     public void pollForLocalFileUpdates_sends_updates_if_interDiff_hasChanges() throws IOException {
-        when(mockPreviousState.retrieve()).thenReturn(new Diff("Previous Changes".getBytes()));
+        when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
         when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("Current Changes"));
         when(mockSystemCommandExecutor.interDiff(anyString(), anyString())).thenReturn(toInputStream("the difference"));
 

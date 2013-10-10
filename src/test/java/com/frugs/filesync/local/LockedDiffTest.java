@@ -9,6 +9,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.concurrent.locks.Lock;
 
+import static com.frugs.filesync.domain.DiffBuilder.aDiff;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
@@ -32,7 +33,7 @@ public class LockedDiffTest {
 
     @Test
     public void set_waits_to_acquire_lock_before_setting_diff() {
-        Diff expectedDiff = new Diff("expected".getBytes());
+        Diff expectedDiff = aDiff().build();
         lockedDiff.set(expectedDiff);
 
         verify(mockLock).lock();

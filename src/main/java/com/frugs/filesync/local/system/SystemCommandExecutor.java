@@ -18,6 +18,10 @@ public class SystemCommandExecutor {
         execute("echo " + diff + "| git apply");
     }
 
+    public InputStream combineDiff(String diff1, String diff2) throws IOException {
+        return execute("combinediff <(" + diff1 + ") <(" + diff2 + ")");
+    }
+
     private InputStream execute(String command) throws IOException {
         return currentRuntime.exec(command).getInputStream();
     }

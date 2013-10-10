@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
+import static com.frugs.filesync.domain.DiffBuilder.aDiff;
 import static java.net.InetAddress.getLocalHost;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -62,7 +63,7 @@ public class ExternalFileUpdateServiceTest {
         new Thread(acceptUpdates).start();
         Thread.sleep(1000);
 
-        Diff incomingDiff = new Diff("testbytes".getBytes());
+        Diff incomingDiff = aDiff().build();
 
         Socket socket = new Socket(getLocalHost(), port);
         socket.getOutputStream().write(incomingDiff.toByteArray());
@@ -93,7 +94,7 @@ public class ExternalFileUpdateServiceTest {
 
         Thread.sleep(1000);
 
-        Diff expectedDiff = new Diff("test".getBytes());
+        Diff expectedDiff = aDiff().build();
         externalFileUpdateService.sendUpdates(expectedDiff);
 
         Diff result = acceptTask.get();

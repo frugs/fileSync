@@ -37,6 +37,13 @@ public class LocalFileUpdateService {
     }
 
     public void updateLocalFiles(Diff update) throws IOException {
+        Diff previous = previousState.retrieve();
         systemCommandExecutor.gitApply(update.toString());
+
+        InputStream updatedDiffInputStream = systemCommandExecutor.combineDiff(previous.toString(), update.toString());
+        Diff updatedDiff = fromInputStream(updatedDiffInputStream);
+
+        previousState.set(updatedDiff);
+        previousState.putBack();
     }
 }
