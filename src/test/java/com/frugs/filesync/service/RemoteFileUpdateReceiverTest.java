@@ -31,13 +31,13 @@ public class RemoteFileUpdateReceiverTest {
     }
 
     @Test
-    public void acceptUpdates_shouldAcceptIncomingDiffStreams_andUpdateLocalFiles() throws IOException, InterruptedException {
+    public void acceptUpdates_shouldAcceptIncomingDiffStreams_andUpdateLocalFiles() throws Exception {
         final Object waitHandle = new Object();
         Runnable acceptUpdates = new Runnable() {
             @Override public void run() {
                 try {
                     remoteFileUpdateReceiver.acceptUpdates();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
 

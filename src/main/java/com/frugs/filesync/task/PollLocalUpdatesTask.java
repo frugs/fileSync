@@ -14,7 +14,7 @@ public class PollLocalUpdatesTask implements Runnable {
     @Override public void run() {
         try {
             localFileUpdatePollingService.pollForLocalFileUpdates();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

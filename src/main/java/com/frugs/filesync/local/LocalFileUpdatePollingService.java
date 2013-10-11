@@ -19,7 +19,7 @@ public class LocalFileUpdatePollingService {
         this.logger = logger;
     }
 
-    public void pollForLocalFileUpdates() throws IOException {
+    public void pollForLocalFileUpdates() throws IOException, InterruptedException {
         Diff current = fileUpdateFacade.getCurrentState();
         Diff previous = previousState.retrieve();
 

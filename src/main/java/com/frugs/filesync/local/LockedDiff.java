@@ -2,7 +2,10 @@ package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class LockedDiff {
     private final Lock lock;
@@ -13,13 +16,13 @@ public class LockedDiff {
         this.diff = diff;
     }
 
-    public Diff retrieve() {
-        lock.lock();
+    public Diff retrieve() throws InterruptedException {
+        lock.tryLock(10, SECONDS);
         return diff;
     }
 
-    public void set(Diff newDiff) {
-        lock.lock();
+    public void set(Diff newDiff) throws InterruptedException {
+        lock.tryLock(10, SECONDS);
         diff = newDiff;
     }
 

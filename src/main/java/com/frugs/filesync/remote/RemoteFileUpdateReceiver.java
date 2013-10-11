@@ -20,7 +20,7 @@ public class RemoteFileUpdateReceiver {
         this.logger = logger;
     }
 
-    public void acceptUpdates() throws IOException {
+    public void acceptUpdates() throws IOException, InterruptedException {
         ServerSocket serverSocket = new ServerSocket(port);
         Socket socket = serverSocket.accept();
         Diff update = Diff.fromInputStream(socket.getInputStream());

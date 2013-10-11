@@ -16,7 +16,7 @@ public class LocalFileUpdater {
         this.logger = logger;
     }
 
-    public void updateLocalFiles(Diff update) throws IOException {
+    public void updateLocalFiles(Diff update) throws IOException, InterruptedException {
         logger.info("updating local files");
         previousState.retrieve();
         fileUpdateFacade.applyDiff(update);

@@ -33,7 +33,7 @@ public class LocalFileUpdaterTest {
     }
 
     @Test
-    public void updateLocalFiles_delegates_to_commandExecutor() throws IOException {
+    public void updateLocalFiles_delegates_to_commandExecutor() throws Exception {
         when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
         when(mockFileUpdateFacade.getCurrentState()).thenReturn(aDiff().build());
 
@@ -43,7 +43,7 @@ public class LocalFileUpdaterTest {
     }
 
     @Test
-    public void updateLocalFiles_updates_previous_state_to_current_state() throws IOException {
+    public void updateLocalFiles_updates_previous_state_to_current_state() throws Exception {
         when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
         when(mockFileUpdateFacade.getCurrentState()).thenReturn(aDiff().withContent("new diff").build());
 

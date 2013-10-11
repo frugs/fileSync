@@ -7,9 +7,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
@@ -25,18 +27,18 @@ public class LockedDiffTest {
     }
 
     @Test
-    public void retrieve_waits_to_acquire_lock_before_returning_diff() {
+    public void retrieve_waits_to_acquire_lock_before_returning_diff() throws Exception {
         Diff result = lockedDiff.retrieve();
-        verify(mockLock).lock();
+        verify(mockLock).tryLock(10, SECONDS);
         assertTrue(result == mockDiff);
     }
 
     @Test
-    public void set_waits_to_acquire_lock_before_setting_diff() {
+    public void set_waits_to_acquire_lock_before_setting_diff() throws Exception {
         Diff expectedDiff = aDiff().build();
         lockedDiff.set(expectedDiff);
 
-        verify(mockLock).lock();
+        verify(mockLock).tryLock(10, SECONDS);
         assertTrue(lockedDiff.retrieve() == expectedDiff);
     }
 

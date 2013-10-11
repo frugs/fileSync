@@ -33,7 +33,7 @@ public class LocalFileUpdatePollingServiceTest {
     }
 
     @Test
-    public void pollForLocalFileUpdates_does_nothing_if_interDiff_is_empty() throws IOException {
+    public void pollForLocalFileUpdates_does_nothing_if_interDiff_is_empty() throws Exception {
         when(mockFileUpdateFacade.interDiff((Diff) any(), (Diff) any())).thenReturn(emptyDiff);
 
         localFileUpdatePollingService.pollForLocalFileUpdates();
@@ -45,7 +45,7 @@ public class LocalFileUpdatePollingServiceTest {
     }
 
     @Test
-    public void pollForLocalFileUpdates_sends_updates_if_interDiff_hasChanges() throws IOException {
+    public void pollForLocalFileUpdates_sends_updates_if_interDiff_hasChanges() throws Exception {
         Diff currentChanges = aDiff().withContent("Current Changes").build();
         Diff difference = aDiff().withContent("non-empty").build();
         when(mockFileUpdateFacade.getCurrentState()).thenReturn(currentChanges);
