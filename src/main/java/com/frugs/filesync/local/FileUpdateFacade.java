@@ -1,20 +1,19 @@
-package com.frugs.filesync.local.system;
+package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
+import com.frugs.filesync.local.system.SystemCommandFacade;
 
 import java.io.IOException;
 
-import static com.frugs.filesync.domain.Diff.fromInputStream;
-
 public class FileUpdateFacade {
-    private final SystemCommandExecutor systemCommandExecutor;
+    private final SystemCommandFacade systemCommandFacade;
 
-    public FileUpdateFacade(SystemCommandExecutor systemCommandExecutor) {
-        this.systemCommandExecutor = systemCommandExecutor;
+    public FileUpdateFacade(SystemCommandFacade systemCommandFacade) {
+        this.systemCommandFacade = systemCommandFacade;
     }
 
     public Diff getCurrentState() throws IOException {
-        return fromInputStream(systemCommandExecutor.gitDiffHead());
+        return systemCommandFacade.gitDiffHead();
     }
 
     public Diff interDiff(Diff first, Diff second) throws IOException {
@@ -25,7 +24,7 @@ public class FileUpdateFacade {
         } else if (second.isEmpty()) {
             result = first;
         } else {
-            result = fromInputStream(systemCommandExecutor.interDiff(first.toString(), second.toString()));
+            result = systemCommandFacade.interDiff(first, second);
         }
 
         return result;
@@ -33,7 +32,7 @@ public class FileUpdateFacade {
 
     public void applyDiff(Diff diff) throws IOException {
         if (diff.hasChanges()) {
-            systemCommandExecutor.gitApply(diff.toString());
+            systemCommandFacade.gitApply(diff);
         }
     }
 }

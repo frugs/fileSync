@@ -1,5 +1,7 @@
 package com.frugs.filesync.local.system;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
@@ -19,14 +21,14 @@ public class SystemCommandExecutor {
         return execute("git diff HEAD");
     }
 
-    public InputStream interDiff(String diff1, String diff2) throws IOException {
+    public InputStream interDiff(String diffFile1, String diffFile2) throws IOException {
         logger.info("performing interdiff");
-        return execute("interdiff <(" + diff1 + ") <(" + diff2 + ")");
+        return execute("interdiff " + diffFile1 + " " + diffFile2);
     }
 
-    public void gitApply(String diff) throws IOException {
+    public void gitApply(String diffFile) throws IOException {
         logger.info("applying diff");
-        execute("echo " + diff + "| git apply");
+        logger.info(IOUtils.toString(execute("git apply" + diffFile)));
     }
 
     private InputStream execute(String command) throws IOException {

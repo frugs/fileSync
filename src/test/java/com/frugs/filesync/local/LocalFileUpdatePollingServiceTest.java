@@ -1,7 +1,6 @@
 package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
-import com.frugs.filesync.local.system.FileUpdateFacade;
 import com.frugs.filesync.remote.RemoteFileUpdateSender;
 import org.junit.Before;
 import org.junit.Test;

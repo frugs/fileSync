@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 public class LocalFileUpdaterTest {
     @Mock private Logger logger;
     @Mock private LockedDiff mockPreviousState;
-    @Mock private FileUpdateFacade mockFileUpdateFacade;
+    @Mock private com.frugs.filesync.local.FileUpdateFacade mockFileUpdateFacade;
 
     private LocalFileUpdater localFileUpdater;
 
@@ -45,7 +45,8 @@ public class LocalFileUpdaterTest {
     @Test
     public void updateLocalFiles_updates_previous_state_to_current_state() throws IOException {
         when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
-        when(mockFileUpdateFacade.getCurrentState()).thenReturn(aDiff().build());
+        when(mockFileUpdateFacade.getCurrentState()).thenReturn(aDiff().withContent("new diff").build());
+
         localFileUpdater.updateLocalFiles(aDiff().build());
 
         ArgumentCaptor<Diff> captor = ArgumentCaptor.forClass(Diff.class);
@@ -55,6 +56,6 @@ public class LocalFileUpdaterTest {
         inOrder.verify(mockPreviousState).putBack();
 
         Diff updatedDiff = captor.getValue();
-        assertThat(updatedDiff, hasContent("combined"));
+        assertThat(updatedDiff, hasContent("new diff"));
     }
 }

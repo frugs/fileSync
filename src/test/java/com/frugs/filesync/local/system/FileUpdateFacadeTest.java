@@ -1,6 +1,7 @@
 package com.frugs.filesync.local.system;
 
 import com.frugs.filesync.domain.Diff;
+import com.frugs.filesync.local.FileUpdateFacade;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,51 +12,56 @@ import java.io.IOException;
 
 import static com.frugs.filesync.domain.Diff.emptyDiff;
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
-import static com.frugs.filesync.domain.DiffMatchers.hasContent;
-import static org.apache.commons.io.IOUtils.toInputStream;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileUpdateFacadeTest {
-    @Mock private SystemCommandExecutor mockSystemCommandExecutor;
+    @Mock private SystemCommandFacade mockSystemCommandFacade;
 
     private FileUpdateFacade fileUpdateFacade;
 
     @Before
     public void setUp() throws Exception {
-        fileUpdateFacade = new FileUpdateFacade(mockSystemCommandExecutor);
+        fileUpdateFacade = new FileUpdateFacade(mockSystemCommandFacade);
     }
 
     @Test
-    public void getCurrentState_delegates_to_commandExecutor_and_returns_result_as_diff() throws IOException {
-        when(mockSystemCommandExecutor.gitDiffHead()).thenReturn(toInputStream("result"));
+    public void getCurrentState_delegates_to_commandFacade() throws IOException {
+        Diff diff = aDiff().build();
+        when(mockSystemCommandFacade.gitDiffHead()).thenReturn(diff);
 
         Diff result = fileUpdateFacade.getCurrentState();
-        assertThat(result, hasContent("result"));
+        assertTrue(result == diff);
     }
 
     @Test
     public void applyDiff_delegates_to_commandExecutor() throws IOException {
-        fileUpdateFacade.applyDiff(aDiff().withContent("content").build());
-        verify(mockSystemCommandExecutor).gitApply("content");
+        Diff diff = aDiff().build();
+
+        fileUpdateFacade.applyDiff(diff);
+        verify(mockSystemCommandFacade).gitApply(diff);
     }
 
     @Test
     public void applyDiff_does_nothing_given_empty_diff() throws IOException {
         fileUpdateFacade.applyDiff(emptyDiff);
-        verifyNoMoreInteractions(mockSystemCommandExecutor);
+        verifyNoMoreInteractions(mockSystemCommandFacade);
     }
 
     @Test
     public void interDiff_delegates_to_commandExecutor() throws IOException {
         Diff firstDiff = aDiff().withContent("firstDiff").build();
         Diff secondDiff = aDiff().withContent("secondDiff").build();
-        when(mockSystemCommandExecutor.interDiff(anyString(), anyString())).thenReturn(toInputStream("interDiff"));
+        Diff interDiff = aDiff().withContent("interDiff").build();
+        when(mockSystemCommandFacade.interDiff((Diff) any(), (Diff) any())).thenReturn(interDiff);
 
         Diff result = fileUpdateFacade.interDiff(firstDiff, secondDiff);
-        assertThat(result, hasContent("interDiff"));
-        verify(mockSystemCommandExecutor).interDiff("firstDiff", "secondDiff");
+
+        assertThat(result, is(interDiff));
+        verify(mockSystemCommandFacade).interDiff(firstDiff, secondDiff);
     }
 
     @Test
@@ -63,8 +69,8 @@ public class FileUpdateFacadeTest {
         Diff secondDiff = aDiff().withContent("secondDiff").build();
 
         Diff result = fileUpdateFacade.interDiff(emptyDiff, secondDiff);
-        assertThat(result, hasContent("secondDiff"));
-        verifyNoMoreInteractions(mockSystemCommandExecutor);
+        assertThat(result, is(secondDiff));
+        verifyNoMoreInteractions(mockSystemCommandFacade);
     }
 
     @Test
@@ -72,7 +78,7 @@ public class FileUpdateFacadeTest {
         Diff firstDiff = aDiff().withContent("firstDiff").build();
 
         Diff result = fileUpdateFacade.interDiff(firstDiff, emptyDiff);
-        assertThat(result, hasContent("firstDiff"));
-        verifyNoMoreInteractions(mockSystemCommandExecutor);
+        assertThat(result, is(firstDiff));
+        verifyNoMoreInteractions(mockSystemCommandFacade);
     }
 }
