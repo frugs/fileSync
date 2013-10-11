@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;

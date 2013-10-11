@@ -2,7 +2,6 @@ package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import static java.util.concurrent.TimeUnit.SECONDS;

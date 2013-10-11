@@ -2,8 +2,6 @@ package com.frugs.filesync.task;
 
 import com.frugs.filesync.local.LocalFileUpdatePollingService;
 
-import java.io.IOException;
-
 public class PollLocalUpdatesTask implements Runnable {
     private final LocalFileUpdatePollingService localFileUpdatePollingService;
 

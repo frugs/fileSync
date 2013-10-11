@@ -11,7 +11,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 import static com.frugs.filesync.domain.DiffBuilder.aDiff;
