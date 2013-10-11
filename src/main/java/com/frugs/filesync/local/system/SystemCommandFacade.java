@@ -31,7 +31,7 @@ public class SystemCommandFacade {
 
     public void gitApply(Diff diff) throws IOException {
         File diffFile = fileWriter.writeBytesToFile(diff.toByteArray());
-        systemCommandExecutor.gitApply(diffFile.getName());
+        systemCommandExecutor.gitApply(diffFile.getPath());
         diffFile.delete();
     }
 }
