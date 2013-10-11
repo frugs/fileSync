@@ -17,7 +17,7 @@ public class SystemCommandExecutor {
     }
 
     public InputStream gitDiffHead() throws IOException {
-        logger.info("performing git diff head");
+        logger.info("performing 'git difftool -y -x \"diff -c\" HEAD'");
         return execute("git difftool -y -x \"diff -c\" HEAD");
     }
 
