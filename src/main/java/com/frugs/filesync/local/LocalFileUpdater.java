@@ -17,7 +17,7 @@ public class LocalFileUpdater {
     }
 
     public void updateLocalFiles(Diff update) throws IOException {
-        logger.info("updating local files\n" + update.toString());
+        logger.info("updating local files");
         previousState.retrieve();
         fileUpdateFacade.applyDiff(update);
 

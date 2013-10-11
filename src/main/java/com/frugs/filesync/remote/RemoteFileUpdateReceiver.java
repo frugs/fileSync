@@ -21,12 +21,13 @@ public class RemoteFileUpdateReceiver {
     }
 
     public void acceptUpdates() throws IOException {
-        Socket socket = new ServerSocket(port).accept();
+        ServerSocket serverSocket = new ServerSocket(port);
+        Socket socket = serverSocket.accept();
         Diff update = Diff.fromInputStream(socket.getInputStream());
 
         logger.info("received updates, they are:\n" + update.toString());
         localFileUpdater.updateLocalFiles(update);
 
-        socket.close();
+        serverSocket.close();
     }
 }
