@@ -22,7 +22,7 @@ public class SystemCommandFacade {
         File firstDiffFile = fileWriter.writeBytesToFile(firstDiff.toByteArray());
         File secondDiffFile = fileWriter.writeBytesToFile(secondDiff.toByteArray());
 
-        Diff result =  Diff.fromInputStream(systemCommandExecutor.interDiff(firstDiffFile.getName(), secondDiffFile.getName()));
+        Diff result =  Diff.fromInputStream(systemCommandExecutor.interDiff(firstDiffFile.getPath(), secondDiffFile.getPath()));
         firstDiffFile.delete();
         secondDiffFile.delete();
 
