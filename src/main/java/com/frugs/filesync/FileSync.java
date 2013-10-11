@@ -32,7 +32,11 @@ public class FileSync {
         }
 
         @Override public void info(String message) {
-            System.out.println(message);
+            System.out.println("INFO:   " + message);
+        }
+
+        @Override public void severe(String message) {
+            System.out.println("SEVERE: " + message);
         }
     }
 

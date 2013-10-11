@@ -28,10 +28,12 @@ public class SystemCommandExecutor {
 
     public void gitApply(String diffFile) throws IOException {
         logger.info("applying diff");
-        logger.info(IOUtils.toString(execute("git apply " + diffFile)));
+        execute("git apply " + diffFile);
     }
 
     private InputStream execute(String command) throws IOException {
-        return currentRuntime.exec(command).getInputStream();
+        Process process = currentRuntime.exec(command);
+        logger.severe(IOUtils.toString(process.getErrorStream()));
+        return process.getInputStream();
     }
 }
