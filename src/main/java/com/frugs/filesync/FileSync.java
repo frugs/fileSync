@@ -55,7 +55,7 @@ public class FileSync {
             SystemCommandFacade systemCommandFacade = new SystemCommandFacade(systemCommandExecutor, fileWriter);
 
             FileUpdateFacade fileUpdateFacade = new FileUpdateFacade(systemCommandFacade);
-            LockedDiff lockedDiff = new LockedDiff(new ReentrantLock(), Diff.fromInputStream(systemCommandExecutor.gitDiffHead()));
+            LockedDiff lockedDiff = new LockedDiff(new ReentrantLock(), systemCommandFacade.gitDiffHead());
 
             LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, fileUpdateFacade, logger);
             RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteAddress, remotePort, logger);
