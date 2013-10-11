@@ -33,7 +33,10 @@ public class SystemCommandExecutor {
 
     private InputStream execute(String command) throws IOException {
         Process process = currentRuntime.exec(command);
-        logger.severe(IOUtils.toString(process.getErrorStream()));
+        String error = IOUtils.toString(process.getErrorStream());
+        if (!error.equals("")) {
+            logger.severe(error);
+        }
         return process.getInputStream();
     }
 }
