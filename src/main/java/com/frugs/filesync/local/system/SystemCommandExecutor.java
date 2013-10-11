@@ -18,7 +18,7 @@ public class SystemCommandExecutor {
 
     public InputStream gitDiffHead() throws IOException {
         logger.info("performing git diff head");
-        return execute("git diff HEAD");
+        return execute("git difftool -y -x \"diff -c\" HEAD");
     }
 
     public InputStream interDiff(String diffFile1, String diffFile2) throws IOException {
@@ -28,7 +28,7 @@ public class SystemCommandExecutor {
 
     public void gitApply(String diffFile) throws IOException {
         logger.info("applying diff");
-        execute("git apply " + diffFile);
+        execute("patch<" + diffFile);
     }
 
     private InputStream execute(String command) throws IOException {
