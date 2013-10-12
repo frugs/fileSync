@@ -13,6 +13,7 @@ public class PollLocalUpdatesTask implements Runnable {
         try {
             localFileUpdatePollingService.pollForLocalFileUpdates();
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

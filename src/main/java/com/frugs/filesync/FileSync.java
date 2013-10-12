@@ -1,6 +1,5 @@
 package com.frugs.filesync;
 
-import com.frugs.filesync.domain.Diff;
 import com.frugs.filesync.local.FileUpdateFacade;
 import com.frugs.filesync.local.LocalFileUpdatePollingService;
 import com.frugs.filesync.local.LocalFileUpdater;

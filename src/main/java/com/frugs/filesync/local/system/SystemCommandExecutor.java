@@ -35,7 +35,6 @@ public class SystemCommandExecutor {
         Process process = currentRuntime.exec(command);
         String error = IOUtils.toString(process.getErrorStream());
         if (!error.equals("")) {
-            logger.severe(error);
             throw new RuntimeException(error);
         }
         return process.getInputStream();
