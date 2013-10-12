@@ -28,7 +28,7 @@ public class SystemCommandExecutor {
 
     public void gitApply(String diffFile) throws IOException {
         logger.info("applying diff");
-        execute("patch -p1 <" + diffFile);
+        execute("patch -p1 -i " + diffFile);
     }
 
     private InputStream execute(String command) throws IOException {
