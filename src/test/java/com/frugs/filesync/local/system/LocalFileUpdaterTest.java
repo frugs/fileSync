@@ -2,7 +2,7 @@ package com.frugs.filesync.local.system;
 
 import com.frugs.filesync.domain.Diff;
 import com.frugs.filesync.local.LocalFileUpdater;
-import com.frugs.filesync.local.LockedDiff;
+import com.frugs.filesync.local.LockingDiff;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class LocalFileUpdaterTest {
     @Mock private Logger logger;
-    @Mock private LockedDiff mockPreviousState;
+    @Mock private LockingDiff mockPreviousState;
     @Mock private com.frugs.filesync.local.FileUpdateFacade mockFileUpdateFacade;
 
     private LocalFileUpdater localFileUpdater;
@@ -33,7 +33,6 @@ public class LocalFileUpdaterTest {
 
     @Test
     public void updateLocalFiles_delegates_to_commandExecutor() throws Exception {
-        when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
         when(mockFileUpdateFacade.getCurrentState()).thenReturn(aDiff().build());
 
         Diff updates = aDiff().withContent("updates").build();
@@ -43,16 +42,15 @@ public class LocalFileUpdaterTest {
 
     @Test
     public void updateLocalFiles_updates_previous_state_to_current_state() throws Exception {
-        when(mockPreviousState.retrieve()).thenReturn(aDiff().build());
         when(mockFileUpdateFacade.getCurrentState()).thenReturn(aDiff().withContent("new diff").build());
 
         localFileUpdater.updateLocalFiles(aDiff().build());
 
         ArgumentCaptor<Diff> captor = ArgumentCaptor.forClass(Diff.class);
         InOrder inOrder = inOrder(mockPreviousState);
-        inOrder.verify(mockPreviousState).retrieve();
+        inOrder.verify(mockPreviousState).lock();
         inOrder.verify(mockPreviousState).set(captor.capture());
-        inOrder.verify(mockPreviousState).putBack();
+        inOrder.verify(mockPreviousState).unlock();
 
         Diff updatedDiff = captor.getValue();
         assertThat(updatedDiff, hasContent("new diff"));

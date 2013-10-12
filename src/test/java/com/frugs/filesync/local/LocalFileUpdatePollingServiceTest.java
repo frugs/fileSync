@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 public class LocalFileUpdatePollingServiceTest {
     @Mock private FileUpdateFacade mockFileUpdateFacade;
     @Mock private RemoteFileUpdateSender mockRemoteFileUpdateSender;
-    @Mock private LockedDiff mockPreviousState;
+    @Mock private LockingDiff mockPreviousState;
     @Mock private Logger logger;
     private LocalFileUpdatePollingService localFileUpdatePollingService;
 
@@ -38,8 +38,8 @@ public class LocalFileUpdatePollingServiceTest {
         localFileUpdatePollingService.pollForLocalFileUpdates();
 
         InOrder inOrder = inOrder(mockPreviousState);
-        inOrder.verify(mockPreviousState).retrieve();
-        inOrder.verify(mockPreviousState).putBack();
+        inOrder.verify(mockPreviousState).lockThenGet();
+        inOrder.verify(mockPreviousState).unlock();
         verifyNoMoreInteractions(mockRemoteFileUpdateSender);
     }
 
@@ -56,10 +56,10 @@ public class LocalFileUpdatePollingServiceTest {
         ArgumentCaptor<Diff> sentDiffCaptor = ArgumentCaptor.forClass(Diff.class);
 
         InOrder inOrder = inOrder(mockPreviousState, mockRemoteFileUpdateSender);
-        inOrder.verify(mockPreviousState).retrieve();
+        inOrder.verify(mockPreviousState).lockThenGet();
         inOrder.verify(mockRemoteFileUpdateSender).sendUpdates(sentDiffCaptor.capture());
         inOrder.verify(mockPreviousState).set(savedDiffCaptor.capture());
-        inOrder.verify(mockPreviousState).putBack();
+        inOrder.verify(mockPreviousState).unlock();
 
         Diff savedDiff = savedDiffCaptor.getValue();
         assertThat(savedDiff, is(currentChanges));

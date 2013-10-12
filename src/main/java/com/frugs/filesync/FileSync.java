@@ -3,7 +3,7 @@ package com.frugs.filesync;
 import com.frugs.filesync.local.FileUpdateFacade;
 import com.frugs.filesync.local.LocalFileUpdatePollingService;
 import com.frugs.filesync.local.LocalFileUpdater;
-import com.frugs.filesync.local.LockedDiff;
+import com.frugs.filesync.local.LockingDiff;
 import com.frugs.filesync.local.system.FileWriter;
 import com.frugs.filesync.local.system.SystemCommandExecutor;
 import com.frugs.filesync.local.system.SystemCommandFacade;
@@ -54,7 +54,7 @@ public class FileSync {
             SystemCommandFacade systemCommandFacade = new SystemCommandFacade(systemCommandExecutor, fileWriter);
 
             FileUpdateFacade fileUpdateFacade = new FileUpdateFacade(systemCommandFacade);
-            LockedDiff lockedDiff = new LockedDiff(new ReentrantLock(), systemCommandFacade.gitDiffHead());
+            LockingDiff lockedDiff = new LockingDiff(new ReentrantLock(), systemCommandFacade.gitDiffHead());
 
             LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, fileUpdateFacade, logger);
             RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteAddress, remotePort, logger);

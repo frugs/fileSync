@@ -6,6 +6,7 @@ import com.frugs.filesync.local.LocalFileUpdater;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 public class RemoteFileUpdateReceiver {
@@ -20,7 +21,7 @@ public class RemoteFileUpdateReceiver {
         this.logger = logger;
     }
 
-    public void acceptUpdates() throws IOException, InterruptedException {
+    public void acceptUpdates() throws IOException, InterruptedException, TimeoutException {
         ServerSocket serverSocket = new ServerSocket(port);
         Socket socket = serverSocket.accept();
         Diff update = Diff.fromInputStream(socket.getInputStream());
