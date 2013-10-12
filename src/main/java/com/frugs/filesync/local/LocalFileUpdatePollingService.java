@@ -2,10 +2,11 @@ package com.frugs.filesync.local;
 
 import com.frugs.filesync.domain.Diff;
 import com.frugs.filesync.remote.RemoteFileUpdateSender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
 
 public class LocalFileUpdatePollingService {
     private final LockingDiff previousState;
@@ -13,11 +14,11 @@ public class LocalFileUpdatePollingService {
     private final RemoteFileUpdateSender remoteFileUpdateSender;
     private final Logger logger;
 
-    public LocalFileUpdatePollingService(LockingDiff previousState, FileUpdateFacade fileUpdateFacade, RemoteFileUpdateSender remoteFileUpdateSender, Logger logger) {
+    public LocalFileUpdatePollingService(LockingDiff previousState, FileUpdateFacade fileUpdateFacade, RemoteFileUpdateSender remoteFileUpdateSender) {
         this.previousState = previousState;
         this.fileUpdateFacade = fileUpdateFacade;
         this.remoteFileUpdateSender = remoteFileUpdateSender;
-        this.logger = logger;
+        this.logger = LoggerFactory.getLogger(LocalFileUpdatePollingService.class);
     }
 
     public void pollForLocalFileUpdates() throws IOException, InterruptedException, TimeoutException {
@@ -26,7 +27,7 @@ public class LocalFileUpdatePollingService {
 
         Diff interDiff = fileUpdateFacade.interDiff(previous, current);
         if (interDiff.hasChanges()) {
-            logger.info("interdiff has changes, they are:\n" + interDiff.toString());
+            logger.debug("interdiff has changes, they are:\n" + interDiff.toString());
             remoteFileUpdateSender.sendUpdates(interDiff);
             previousState.set(current);
         }

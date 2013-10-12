@@ -1,10 +1,11 @@
 package com.frugs.filesync.local.system;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Logger;
 
 public class SystemCommandExecutor {
 
@@ -12,22 +13,22 @@ public class SystemCommandExecutor {
 
     private static final Runtime currentRuntime = Runtime.getRuntime();
 
-    public SystemCommandExecutor(Logger logger) {
-        this.logger = logger;
+    public SystemCommandExecutor() {
+        this.logger = LoggerFactory.getLogger(SystemCommandExecutor.class);
     }
 
     public InputStream gitDiffHead() throws IOException {
-        logger.info("performing git diff head");
+        logger.debug("performing git diff head");
         return execute("git diff HEAD");
     }
 
     public InputStream interDiff(String diffFile1, String diffFile2) throws IOException {
-        logger.info("performing interdiff");
+        logger.debug("performing interdiff");
         return execute("interdiff " + diffFile1 + " " + diffFile2);
     }
 
     public void gitApply(String diffFile) throws IOException {
-        logger.info("applying diff");
+        logger.debug("applying diff");
         execute("patch -p1 -i " + diffFile);
     }
 

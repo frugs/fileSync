@@ -2,12 +2,13 @@ package com.frugs.filesync.remote;
 
 import com.frugs.filesync.domain.Diff;
 import com.frugs.filesync.local.LocalFileUpdater;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
 
 public class RemoteFileUpdateReceiver {
 
@@ -15,10 +16,10 @@ public class RemoteFileUpdateReceiver {
     private final LocalFileUpdater localFileUpdater;
     private final Logger logger;
 
-    public RemoteFileUpdateReceiver(int port, LocalFileUpdater localFileUpdater, Logger logger) {
+    public RemoteFileUpdateReceiver(int port, LocalFileUpdater localFileUpdater) {
         this.port = port;
         this.localFileUpdater = localFileUpdater;
-        this.logger = logger;
+        this.logger = LoggerFactory.getLogger(LocalFileUpdater.class);
     }
 
     public void acceptUpdates() throws IOException, InterruptedException, TimeoutException {
@@ -26,7 +27,7 @@ public class RemoteFileUpdateReceiver {
         Socket socket = serverSocket.accept();
         Diff update = Diff.fromInputStream(socket.getInputStream());
 
-        logger.info("received updates, they are:\n" + update.toString());
+        logger.debug("received updates, they are:\n" + update.toString());
         localFileUpdater.updateLocalFiles(update);
 
         serverSocket.close();
