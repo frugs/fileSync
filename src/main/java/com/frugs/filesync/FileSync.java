@@ -12,6 +12,7 @@ import com.frugs.filesync.remote.RemoteFileUpdateSender;
 import com.frugs.filesync.task.PollLocalUpdatesTask;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +32,8 @@ public static void main(String[] args) {
             int localPort = parseInt(args[0]);
             int remotePort = parseInt(args[1]);
 
+            InetSocketAddress remoteHost = new InetSocketAddress(remoteAddress, remotePort);
+
             SystemCommandExecutor systemCommandExecutor = new SystemCommandExecutor();
             FileWriter fileWriter = new FileWriter();
             SystemCommandFacade systemCommandFacade = new SystemCommandFacade(systemCommandExecutor, fileWriter);
@@ -39,7 +42,7 @@ public static void main(String[] args) {
             LockingDiff lockedDiff = new LockingDiff(new ReentrantLock(), systemCommandFacade.gitDiffHead());
 
             LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, fileUpdateFacade);
-            RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteAddress, remotePort);
+            RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteHost);
 
             LocalFileUpdatePollingService localFileUpdatePollingService = new LocalFileUpdatePollingService(lockedDiff, fileUpdateFacade, remoteFileUpdateSender);
             RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(localPort, localFileUpdater);

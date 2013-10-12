@@ -23,12 +23,11 @@ public class LocalFileUpdatePollingServiceTest {
     @Mock private FileUpdateFacade mockFileUpdateFacade;
     @Mock private RemoteFileUpdateSender mockRemoteFileUpdateSender;
     @Mock private LockingDiff mockPreviousState;
-    @Mock private Logger logger;
     private LocalFileUpdatePollingService localFileUpdatePollingService;
 
     @Before
     public void setUp() {
-        localFileUpdatePollingService = new LocalFileUpdatePollingService(mockPreviousState, mockFileUpdateFacade, mockRemoteFileUpdateSender, logger);
+        localFileUpdatePollingService = new LocalFileUpdatePollingService(mockPreviousState, mockFileUpdateFacade, mockRemoteFileUpdateSender);
     }
 
     @Test

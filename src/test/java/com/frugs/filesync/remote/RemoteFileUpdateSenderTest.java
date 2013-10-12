@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Callable;
@@ -23,14 +24,13 @@ import static org.junit.Assert.assertTrue;
 @RunWith(MockitoJUnitRunner.class)
 public class RemoteFileUpdateSenderTest {
 
-    @Mock private Logger logger;
-
     private static final int port = 48939;
     private RemoteFileUpdateSender remoteFileUpdateReceiver;
 
     @Before
     public void setUp() throws Exception {
-        remoteFileUpdateReceiver = new RemoteFileUpdateSender(getLocalHost(), port, logger);
+        InetSocketAddress localHost = new InetSocketAddress(getLocalHost(), port);
+        remoteFileUpdateReceiver = new RemoteFileUpdateSender(localHost);
     }
 
     @Test

@@ -20,7 +20,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LocalFileUpdaterTest {
-    @Mock private Logger logger;
     @Mock private LockingDiff mockPreviousState;
     @Mock private com.frugs.filesync.local.FileUpdateFacade mockFileUpdateFacade;
 
@@ -28,7 +27,7 @@ public class LocalFileUpdaterTest {
 
     @Before
     public void setUp() {
-        localFileUpdater = new LocalFileUpdater(mockPreviousState, mockFileUpdateFacade, logger);
+        localFileUpdater = new LocalFileUpdater(mockPreviousState, mockFileUpdateFacade);
     }
 
     @Test

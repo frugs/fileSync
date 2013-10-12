@@ -20,13 +20,12 @@ import static org.mockito.Mockito.verify;
 public class RemoteFileUpdateReceiverTest {
     private final static int port = 49803;
     @Mock private LocalFileUpdater mockLocalFileUpdater;
-    @Mock private Logger logger;
 
     private RemoteFileUpdateReceiver remoteFileUpdateReceiver;
 
     @Before
     public void setUp() throws Exception {
-        remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(port, mockLocalFileUpdater, logger);
+        remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(port, mockLocalFileUpdater);
     }
 
     @Test
