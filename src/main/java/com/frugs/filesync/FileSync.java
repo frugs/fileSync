@@ -18,6 +18,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.frugs.filesync.FileSyncModule.createModule;
 import static java.lang.Integer.parseInt;
 import static java.net.InetAddress.getLocalHost;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -31,27 +32,15 @@ public static void main(String[] args) {
             InetAddress remoteAddress = getLocalHost();
             int localPort = parseInt(args[0]);
             int remotePort = parseInt(args[1]);
-
             InetSocketAddress remoteHost = new InetSocketAddress(remoteAddress, remotePort);
 
-            SystemCommandExecutor systemCommandExecutor = new SystemCommandExecutor();
-            FileWriter fileWriter = new FileWriter();
-            SystemCommandFacade systemCommandFacade = new SystemCommandFacade(systemCommandExecutor, fileWriter);
+            FileSyncModule module = createModule(remoteHost, localPort);
 
-            FileUpdateFacade fileUpdateFacade = new FileUpdateFacade(systemCommandFacade);
-            LockingDiff lockedDiff = new LockingDiff(new ReentrantLock(), systemCommandFacade.gitDiffHead());
-
-            LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, fileUpdateFacade);
-            RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteHost);
-
-            LocalFileUpdatePollingService localFileUpdatePollingService = new LocalFileUpdatePollingService(lockedDiff, fileUpdateFacade, remoteFileUpdateSender);
-            RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(localPort, localFileUpdater);
-
-            Runnable pollLocalUpdatesTask = new PollLocalUpdatesTask(localFileUpdatePollingService);
+            Runnable pollLocalUpdatesTask = new PollLocalUpdatesTask(module.localFileUpdatePollingService);
             startInSingleRepeatingThread(pollLocalUpdatesTask, 500, MILLISECONDS);
 
             while (true) {
-                remoteFileUpdateReceiver.acceptUpdates();
+                module.remoteFileUpdateReceiver.acceptUpdates();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
