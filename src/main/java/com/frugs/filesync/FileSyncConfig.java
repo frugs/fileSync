@@ -1,4 +1,4 @@
-package com.frugs.filesync.application;
+package com.frugs.filesync;
 
 import java.net.InetSocketAddress;
 

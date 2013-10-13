@@ -1,4 +1,4 @@
-package com.frugs.filesync.application;
+package com.frugs.filesync;
 
 import com.frugs.filesync.local.FileUpdateFacade;
 import com.frugs.filesync.local.LocalFileUpdatePollingService;

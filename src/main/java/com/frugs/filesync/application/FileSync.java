@@ -1,6 +1,9 @@
 package com.frugs.filesync.application;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
+import com.frugs.filesync.FileSyncConfig;
+import com.frugs.filesync.FileSyncModule;
 import com.frugs.filesync.task.PollLocalUpdatesTask;
 
 import java.util.concurrent.Executors;
@@ -15,7 +18,14 @@ public class FileSync {
 
         CommandLineParams commandLineParams = new CommandLineParams();
         JCommander commander = new JCommander(commandLineParams);
-        commander.parse(args);
+        commander.setProgramName("fileSync");
+
+        try {
+            commander.parse(args);
+        } catch (ParameterException e) {
+            commander.usage();
+            return;
+        }
 
         if (commandLineParams.hadHelpSwitch()) {
             commander.usage();
