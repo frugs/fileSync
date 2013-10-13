@@ -1,4 +1,4 @@
-package com.frugs.filesync;
+package com.frugs.filesync.application;
 
 import com.frugs.filesync.local.FileUpdateFacade;
 import com.frugs.filesync.local.LocalFileUpdatePollingService;
@@ -11,7 +11,6 @@ import com.frugs.filesync.remote.RemoteFileUpdateReceiver;
 import com.frugs.filesync.remote.RemoteFileUpdateSender;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class FileSyncModule {
@@ -23,7 +22,7 @@ public class FileSyncModule {
         this.localFileUpdatePollingService = localFileUpdatePollingService;
     }
 
-    public static FileSyncModule createModule(InetSocketAddress remoteHost, int localPort) throws IOException {
+    public static FileSyncModule createModule(FileSyncConfig config) throws IOException {
         SystemCommandExecutor systemCommandExecutor = new SystemCommandExecutor();
         FileWriter fileWriter = new FileWriter();
         SystemCommandFacade systemCommandFacade = new SystemCommandFacade(systemCommandExecutor, fileWriter);
@@ -32,10 +31,10 @@ public class FileSyncModule {
         LockingDiff lockedDiff = new LockingDiff(new ReentrantLock(), systemCommandFacade.gitDiffHead());
 
         LocalFileUpdater localFileUpdater = new LocalFileUpdater(lockedDiff, fileUpdateFacade);
-        RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(remoteHost);
+        RemoteFileUpdateSender remoteFileUpdateSender = new RemoteFileUpdateSender(config.remoteHost);
 
         LocalFileUpdatePollingService localFileUpdatePollingService = new LocalFileUpdatePollingService(lockedDiff, fileUpdateFacade, remoteFileUpdateSender);
-        RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(localPort, localFileUpdater);
+        RemoteFileUpdateReceiver remoteFileUpdateReceiver = new RemoteFileUpdateReceiver(config.localPort, localFileUpdater);
 
         return new FileSyncModule(remoteFileUpdateReceiver, localFileUpdatePollingService);
     }
