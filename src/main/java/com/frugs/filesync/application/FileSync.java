@@ -2,7 +2,6 @@ package com.frugs.filesync.application;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import com.frugs.filesync.FileSyncConfig;
 import com.frugs.filesync.FileSyncModule;
 import com.frugs.filesync.task.PollLocalUpdatesTask;
 
@@ -16,8 +15,8 @@ public class FileSync {
 
     public static void main(String[] args) {
 
-        CommandLineParams commandLineParams = new CommandLineParams();
-        JCommander commander = new JCommander(commandLineParams);
+        CommandLineConfig config = new CommandLineConfig();
+        JCommander commander = new JCommander(config);
         commander.setProgramName("fileSync");
 
         try {
@@ -27,13 +26,12 @@ public class FileSync {
             return;
         }
 
-        if (commandLineParams.hadHelpSwitch()) {
+        if (config.hadHelpSwitch()) {
             commander.usage();
             return;
         }
 
         try {
-            FileSyncConfig config = commandLineParams.toConfig();
             FileSyncModule module = FileSyncModule.createModule(config);
 
             Runnable pollLocalUpdatesTask = new PollLocalUpdatesTask(module.localFileUpdatePollingService);
@@ -43,6 +41,7 @@ public class FileSync {
                 module.remoteFileUpdateReceiver.acceptUpdates();
             }
         } catch (Exception e) {
+
             throw new RuntimeException(e);
         }
     }
