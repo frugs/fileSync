@@ -72,13 +72,4 @@ public class FileUpdateFacadeTest {
         assertThat(result, is(secondDiff));
         verifyNoMoreInteractions(mockSystemCommandFacade);
     }
-
-    @Test
-    public void interDiff_returns_firstDiff_given_secondDiff_isEmpty() throws IOException {
-        Diff firstDiff = aDiff().withContent("firstDiff").build();
-
-        Diff result = fileUpdateFacade.interDiff(firstDiff, emptyDiff);
-        assertThat(result, is(firstDiff));
-        verifyNoMoreInteractions(mockSystemCommandFacade);
-    }
 }

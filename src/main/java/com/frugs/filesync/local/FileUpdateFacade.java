@@ -21,8 +21,6 @@ public class FileUpdateFacade {
 
         if (first.isEmpty()) {
             result = second;
-        } else if (second.isEmpty()) {
-            result = first;
         } else {
             result = systemCommandFacade.interDiff(first, second);
         }
