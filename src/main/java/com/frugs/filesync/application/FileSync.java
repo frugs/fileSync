@@ -41,7 +41,6 @@ public class FileSync {
                 module.remoteFileUpdateReceiver.acceptUpdates();
             }
         } catch (Exception e) {
-
             throw new RuntimeException(e);
         }
     }
