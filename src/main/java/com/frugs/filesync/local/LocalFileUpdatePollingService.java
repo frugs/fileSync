@@ -22,8 +22,8 @@ public class LocalFileUpdatePollingService {
     }
 
     public void pollForLocalFileUpdates() throws IOException, InterruptedException, TimeoutException {
-        Diff current = fileUpdateFacade.getCurrentState();
         Diff previous = previousState.lockThenGet();
+        Diff current = fileUpdateFacade.getCurrentState();
 
         Diff interDiff = fileUpdateFacade.interDiff(previous, current);
         if (interDiff.hasChanges()) {
