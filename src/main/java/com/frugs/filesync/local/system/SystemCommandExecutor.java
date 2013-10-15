@@ -29,7 +29,8 @@ public class SystemCommandExecutor {
 
     public void gitApply(String diffFile) throws IOException {
         logger.debug("applying diff");
-        execute("patch -p1 -i " + diffFile);
+        String result = IOUtils.toString(execute("patch -p1 -i " + diffFile));
+        logger.debug(result);
     }
 
     private InputStream execute(String command) throws IOException {
