@@ -34,9 +34,9 @@ public class SystemCommandExecutor {
 
     private InputStream execute(String command) throws IOException {
         Process process = currentRuntime.exec(command);
-        String error = IOUtils.toString(process.getErrorStream());
-        if (!error.equals("")) {
-            throw new RuntimeException(error);
+        InputStream errorStream = process.getErrorStream();
+        if (errorStream.available() > 0) {
+            throw new RuntimeException(IOUtils.toString(errorStream));
         }
         return process.getInputStream();
     }
