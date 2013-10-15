@@ -3,3 +3,7 @@
 fileSync.iml
 lib/
 out/
+.gradle/
+build/
+fileSync.ipr
+fileSync.iws

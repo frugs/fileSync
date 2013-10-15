@@ -19,7 +19,7 @@ public class SystemCommandExecutor {
 
     public InputStream gitDiffHead() throws IOException {
         logger.debug("performing git diff head");
-        return execute("git diff HEAD");
+        return execute("git --no-pager diff HEAD");
     }
 
     public InputStream interDiff(String diffFile1, String diffFile2) throws IOException {
