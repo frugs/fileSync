@@ -13,3 +13,9 @@ dependencies {
     testCompile 'junit:junit:4.+'
     testCompile 'org.mockito:mockito-all:1.9.5'
 }
+
+jar {
+    manifest {
+        attributes("Main-Class": "com.frugs.filesync.application.FileSync")
+    }
+}
